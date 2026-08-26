@@ -1,0 +1,62 @@
+    <script>
+        (function () {
+            'use strict';
+
+            var query   = new URLSearchParams(window.location.search);
+            var orderId = query.get('order_id');
+            var token   = query.get('token');
+
+            var icon    = document.getElementById('resultIcon');
+            var title   = document.getElementById('resultTitle');
+            var message = document.getElementById('resultMessage');
+            var receipt = document.getElementById('receipt');
+
+            document.getElementById('printBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                window.print();
+            });
+
+            function set(id, value) {
+                document.getElementById(id).textContent = value || '-';
+            }
+
+            if (!orderId || !token) {
+                // Someone opened the page directly. Say so plainly rather than
+                // implying a payment happened.
+                icon.className = 'result-icon wait';
+                icon.innerHTML = '<i class="fas fa-circle-info"></i>';
+                title.textContent = 'No payment to show';
+                message.textContent = 'This page shows your receipt right after a payment. If you have just paid and landed here, check your email for the Razorpay receipt or message us and we will confirm it.';
+                return;
+            }
+
+            fetch('api/payment-status.php?order_id=' + encodeURIComponent(orderId) + '&token=' + encodeURIComponent(token))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.success) { throw new Error(data.error || 'Not found'); }
+
+                    set('rcReceipt', data.receipt || data.order_id);
+                    set('rcPayment', data.payment_id);
+                    set('rcService', data.service);
+                    set('rcName', data.name);
+                    set('rcAmount', 'Rs ' + (data.amount / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 }));
+                    set('rcDate', data.at ? new Date(data.at).toLocaleString('en-IN') : '');
+                    receipt.hidden = false;
+
+                    if (data.status === 'pending_confirmation') {
+                        icon.className = 'result-icon wait';
+                        icon.innerHTML = '<i class="fas fa-clock"></i>';
+                        title.textContent = 'Payment received, confirming with the bank';
+                        message.textContent = 'Your money has left your account and we have the reference. Confirmation usually lands within a few minutes.';
+                    } else if (data.status !== 'paid') {
+                        icon.className = 'result-icon bad';
+                        icon.innerHTML = '<i class="fas fa-xmark"></i>';
+                        title.textContent = 'This payment was not completed';
+                        message.textContent = 'Nothing has been charged. You can try again from the payment page.';
+                    }
+                })
+                .catch(function () {
+                    message.textContent = 'Your payment went through. We could not load the receipt details just now, but the Razorpay email receipt has everything on it.';
+                });
+        })();
+    </script>

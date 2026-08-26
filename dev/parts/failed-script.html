@@ -1,0 +1,23 @@
+    <script>
+        (function () {
+            'use strict';
+
+            var query  = new URLSearchParams(window.location.search);
+            var reason = query.get('reason');
+            var order  = query.get('order_id');
+
+            if (query.get('status') === 'cancelled') {
+                document.getElementById('resultIcon').className = 'result-icon wait';
+                document.getElementById('resultIcon').innerHTML = '<i class="fas fa-circle-info"></i>';
+                document.getElementById('resultTitle').textContent = 'Payment cancelled';
+                document.getElementById('resultMessage').textContent = 'You closed the payment window before finishing. Nothing has been charged - pick up where you left off whenever you are ready.';
+            }
+
+            if (reason || order) {
+                // Reason comes from the URL, so set it as text - never as HTML.
+                document.getElementById('rcReason').textContent = reason ? reason.slice(0, 200) : 'Not completed';
+                document.getElementById('rcOrder').textContent = order ? order.slice(0, 60) : '-';
+                document.getElementById('reasonBox').hidden = false;
+            }
+        })();
+    </script>

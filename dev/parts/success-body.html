@@ -1,0 +1,29 @@
+    <section class="page-header pay-header">
+        <div class="page-header-content">
+            <h1>Payment Received</h1>
+        </div>
+    </section>
+
+    <section class="section pay-section">
+        <div class="container">
+            <div class="result-wrap">
+                <div class="result-icon ok" id="resultIcon"><i class="fas fa-check"></i></div>
+                <h1 id="resultTitle">Thank you, your payment went through</h1>
+                <p id="resultMessage">A receipt has been emailed to you by Razorpay. We will be in touch shortly.</p>
+
+                <div class="receipt" id="receipt" hidden>
+                    <div class="receipt-row"><span>Reference</span><strong id="rcReceipt">-</strong></div>
+                    <div class="receipt-row"><span>Payment ID</span><strong id="rcPayment">-</strong></div>
+                    <div class="receipt-row"><span>Paid for</span><strong id="rcService">-</strong></div>
+                    <div class="receipt-row"><span>Paid by</span><strong id="rcName">-</strong></div>
+                    <div class="receipt-row"><span>Date</span><strong id="rcDate">-</strong></div>
+                    <div class="receipt-row total"><span>Amount</span><strong id="rcAmount">-</strong></div>
+                </div>
+
+                <div class="result-actions">
+                    <a href="index.html" class="btn btn-primary"><i class="fas fa-house"></i> Back to Home</a>
+                    <a href="#" class="btn btn-outline" id="printBtn"><i class="fas fa-print"></i> Print Receipt</a>
+                </div>
+            </div>
+        </div>
+    </section>

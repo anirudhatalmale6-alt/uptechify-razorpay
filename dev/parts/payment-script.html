@@ -1,0 +1,267 @@
+    <!-- Razorpay Checkout -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            var API = 'api/';
+            var form = document.getElementById('paymentForm');
+            if (!form) { return; }
+
+            var serviceSelect = document.getElementById('payService');
+            var amountInput   = document.getElementById('payAmount');
+            var amountGroup   = document.getElementById('amountGroup');
+            var amountHint    = document.getElementById('amountHint');
+            var summary       = document.getElementById('paySummary');
+            var summaryAmount = document.getElementById('paySummaryAmount');
+            var alertBox      = document.getElementById('payAlert');
+            var button        = document.getElementById('payButton');
+            var buttonText    = document.getElementById('payButtonText');
+
+            var catalogue = {};
+            var limits    = { min: 1, max: 500000 };
+
+            function rupees(n) {
+                return 'Rs ' + Number(n).toLocaleString('en-IN', {
+                    minimumFractionDigits: (n % 1 === 0) ? 0 : 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            function notify(message, kind, scroll) {
+                alertBox.textContent = message;
+                alertBox.className = 'pay-alert' + (kind === 'info' ? ' info' : '');
+                alertBox.hidden = false;
+                // Only pull the page down when the customer did something and
+                // needs to see the answer - not for a notice shown on load.
+                if (scroll !== false) {
+                    alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            function clearNotice() {
+                alertBox.hidden = true;
+                alertBox.textContent = '';
+            }
+
+            function busy(state, label) {
+                button.disabled = state;
+                buttonText.textContent = label || 'Pay Now';
+            }
+
+            // ---- load the service list from the server -----------------------
+            fetch(API + 'services.php', { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data || !data.success) { throw new Error('bad response'); }
+
+                    limits.min = data.min;
+                    limits.max = data.max;
+
+                    data.services.forEach(function (service) {
+                        catalogue[service.key] = service;
+                        var option = document.createElement('option');
+                        option.value = service.key;
+                        option.textContent = service.amount === null
+                            ? service.label
+                            : service.label + ' - ' + rupees(service.amount);
+                        serviceSelect.appendChild(option);
+                    });
+
+                    if (!data.ready) {
+                        notify('Online payments are not switched on yet. Please contact us and we will send you a payment link.', 'info', false);
+                        busy(true, 'Unavailable');
+                    } else if (data.mode === 'test') {
+                        notify('Test mode is on - no real money will be charged.', 'info', false);
+                    }
+
+                    // Deep link: payment.html?service=web-design&amount=15000
+                    var query = new URLSearchParams(window.location.search);
+                    if (query.get('service') && catalogue[query.get('service')]) {
+                        serviceSelect.value = query.get('service');
+                    }
+                    if (query.get('amount')) {
+                        amountInput.value = query.get('amount').replace(/[^0-9.]/g, '');
+                    }
+                    if (query.get('invoice')) {
+                        document.getElementById('payInvoice').value = query.get('invoice');
+                    }
+                    onServiceChange();
+                })
+                .catch(function () {
+                    notify('Could not load the payment options. Please refresh the page.');
+                    busy(true, 'Unavailable');
+                });
+
+            // ---- fixed price vs customer entered ------------------------------
+            function selectedAmount() {
+                var service = catalogue[serviceSelect.value];
+                if (!service) { return null; }
+                if (service.amount !== null) { return service.amount; }
+                var typed = parseFloat(amountInput.value);
+                return isNaN(typed) ? null : typed;
+            }
+
+            function refreshSummary() {
+                var amount = selectedAmount();
+                if (amount === null || amount <= 0) {
+                    summary.hidden = true;
+                    return;
+                }
+                summaryAmount.textContent = rupees(amount);
+                summary.hidden = false;
+            }
+
+            function onServiceChange() {
+                var service = catalogue[serviceSelect.value];
+
+                if (service && service.amount !== null) {
+                    // Price is set by us. Show it, but don't let it be edited -
+                    // the server ignores anything typed here anyway.
+                    amountInput.value = service.amount;
+                    amountInput.readOnly = true;
+                    amountHint.textContent = 'Fixed price for this package.';
+                } else {
+                    if (amountInput.readOnly) { amountInput.value = ''; }
+                    amountInput.readOnly = false;
+                    amountHint.textContent = 'Enter the amount we quoted you.';
+                }
+                refreshSummary();
+            }
+
+            serviceSelect.addEventListener('change', function () {
+                clearNotice();
+                onServiceChange();
+            });
+
+            amountInput.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+                refreshSummary();
+            });
+
+            // ---- checked here for a quick answer, and again on the server -----
+            function localProblem() {
+                var name = document.getElementById('payName').value.trim();
+                var email = document.getElementById('payEmail').value.trim();
+                var phone = document.getElementById('payPhone').value.replace(/[^0-9+]/g, '');
+                var amount = selectedAmount();
+
+                if (name.length < 2) { return 'Please enter your name.'; }
+                if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) { return 'Please enter a valid email address.'; }
+                if (!/^\+?[0-9]{10,14}$/.test(phone)) { return 'Please enter a valid phone number.'; }
+                if (!serviceSelect.value) { return 'Please choose what the payment is for.'; }
+                if (amount === null || amount < limits.min || amount > limits.max) {
+                    return 'Please enter an amount between ' + rupees(limits.min) + ' and ' + rupees(limits.max) + '.';
+                }
+                return null;
+            }
+
+            function post(url, body) {
+                return fetch(API + url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(body)
+                }).then(function (response) {
+                    return response.json().catch(function () {
+                        throw new Error('The server sent an unexpected response.');
+                    });
+                });
+            }
+
+            function tellServer(orderId, outcome, reason) {
+                // Best effort - the webhook is the real safety net.
+                post('cancel-order.php', { order_id: orderId, outcome: outcome, reason: reason })
+                    .catch(function () { });
+            }
+
+            // ---- submit --------------------------------------------------------
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                clearNotice();
+
+                var problem = localProblem();
+                if (problem) { notify(problem); return; }
+
+                if (typeof Razorpay === 'undefined') {
+                    notify('The payment window could not load. Check your internet connection and try again.');
+                    return;
+                }
+
+                busy(true, 'Starting secure payment...');
+
+                post('create-order.php', {
+                    name:    document.getElementById('payName').value.trim(),
+                    email:   document.getElementById('payEmail').value.trim(),
+                    phone:   document.getElementById('payPhone').value.replace(/[^0-9+]/g, ''),
+                    service: serviceSelect.value,
+                    amount:  selectedAmount(),
+                    invoice: document.getElementById('payInvoice').value.trim(),
+                    notes:   document.getElementById('payNotes').value.trim(),
+                    company_website: document.getElementById('company_website').value
+                }).then(function (order) {
+                    if (!order.success) { throw new Error(order.error || 'Could not start the payment.'); }
+                    openCheckout(order);
+                }).catch(function (error) {
+                    busy(false);
+                    notify(error.message || 'Something went wrong. Please try again.');
+                });
+            });
+
+            function openCheckout(order) {
+                var settled = false;
+
+                var checkout = new Razorpay({
+                    key:         order.key_id,
+                    amount:      order.amount,
+                    currency:    order.currency,
+                    order_id:    order.order_id,
+                    name:        order.business.name,
+                    description: order.business.description,
+                    image:       order.business.logo,
+                    prefill:     order.prefill,
+                    notes:       { receipt: order.receipt },
+                    theme:       { color: order.business.theme_color },
+
+                    handler: function (response) {
+                        settled = true;
+                        busy(true, 'Verifying payment...');
+
+                        post('verify-payment.php', {
+                            razorpay_order_id:   response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature:  response.razorpay_signature
+                        }).then(function (result) {
+                            if (!result.success) { throw new Error(result.error || 'Verification failed.'); }
+                            window.location.href = 'payment-success.html?order_id='
+                                + encodeURIComponent(result.order_id)
+                                + '&token=' + encodeURIComponent(result.token);
+                        }).catch(function (error) {
+                            busy(false);
+                            notify(error.message + ' Your payment reference is ' + response.razorpay_payment_id
+                                + ' - please send it to us and we will confirm it manually.');
+                        });
+                    },
+
+                    modal: {
+                        ondismiss: function () {
+                            if (settled) { return; }
+                            busy(false);
+                            tellServer(order.order_id, 'cancelled', 'Customer closed the payment window');
+                            notify('Payment cancelled. Nothing has been charged - you can try again whenever you are ready.', 'info');
+                        }
+                    }
+                });
+
+                checkout.on('payment.failed', function (event) {
+                    settled = true;
+                    var problem = (event.error && event.error.description) || 'The payment did not go through.';
+                    tellServer(order.order_id, 'failed', problem);
+                    busy(false);
+                    notify(problem + ' Nothing has been charged. Please try a different method.');
+                });
+
+                checkout.open();
+                busy(false);
+            }
+        })();
+    </script>

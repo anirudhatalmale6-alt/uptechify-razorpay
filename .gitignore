@@ -1,0 +1,9 @@
+# Never commit real credentials
+api/keys.php
+
+# Test scratch
+dev/tests/logs/
+dev/tests/scratch-data/
+dev/tests/scratch-browser-data/
+dev/tests/screenshots/
+data/

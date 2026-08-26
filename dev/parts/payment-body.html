@@ -1,0 +1,118 @@
+    <!-- Page Header -->
+    <section class="page-header pay-header">
+        <div class="page-header-content">
+            <h1>Make a Payment</h1>
+        </div>
+    </section>
+
+    <!-- Payment Section -->
+    <section class="section pay-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Pay Securely Online</h2>
+                <p>Card, UPI, Net Banking or Wallet. Payments are processed by Razorpay - we never see or store your card details.</p>
+            </div>
+
+            <div class="pay-grid">
+                <!-- Form -->
+                <div class="contact-form-container pay-card">
+                    <form id="paymentForm" novalidate>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="payName">Full Name <span class="req">*</span></label>
+                                <input type="text" id="payName" name="name" class="form-control" autocomplete="name" maxlength="100" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="payPhone">Phone Number <span class="req">*</span></label>
+                                <input type="tel" id="payPhone" name="phone" class="form-control" autocomplete="tel" inputmode="tel" maxlength="15" placeholder="10 digit mobile number" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="payEmail">Email Address <span class="req">*</span></label>
+                            <input type="email" id="payEmail" name="email" class="form-control" autocomplete="email" maxlength="120" required>
+                            <small class="field-hint">Your receipt is sent here by Razorpay.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="payService">Paying For <span class="req">*</span></label>
+                            <select id="payService" name="service" class="form-control" required>
+                                <option value="">Select a service</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group" id="amountGroup">
+                                <label for="payAmount">Amount (INR) <span class="req">*</span></label>
+                                <input type="text" id="payAmount" name="amount" class="form-control" inputmode="decimal" placeholder="e.g. 15000">
+                                <small class="field-hint" id="amountHint">Enter the amount we quoted you.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="payInvoice">Invoice / Quote Ref <span class="optional">(optional)</span></label>
+                                <input type="text" id="payInvoice" name="invoice" class="form-control" maxlength="60" placeholder="e.g. UPT-2026-014">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="payNotes">Note for us <span class="optional">(optional)</span></label>
+                            <textarea id="payNotes" name="notes" class="form-control pay-notes" maxlength="300"></textarea>
+                        </div>
+
+                        <!-- Left empty by humans, filled by bots. Do not remove. -->
+                        <div class="hp-field" aria-hidden="true">
+                            <label for="company_website">Company Website</label>
+                            <input type="text" id="company_website" name="company_website" tabindex="-1" autocomplete="off">
+                        </div>
+
+                        <div class="pay-summary" id="paySummary" hidden>
+                            <span>Total payable</span>
+                            <strong id="paySummaryAmount">Rs 0</strong>
+                        </div>
+
+                        <div class="pay-alert" id="payAlert" role="alert" hidden></div>
+
+                        <button type="submit" class="btn btn-primary btn-large pay-submit" id="payButton">
+                            <i class="fas fa-lock"></i>
+                            <span id="payButtonText">Pay Now</span>
+                        </button>
+
+                        <p class="pay-secure">
+                            <i class="fas fa-shield-halved"></i>
+                            Secured by Razorpay &middot; 256-bit encryption &middot; PCI DSS compliant
+                        </p>
+                    </form>
+                </div>
+
+                <!-- Side panel -->
+                <aside class="pay-side">
+                    <div class="pay-side-card">
+                        <h3>How it works</h3>
+                        <ol class="pay-steps">
+                            <li><span>1</span> Fill in your details and the amount</li>
+                            <li><span>2</span> The Razorpay window opens on this page</li>
+                            <li><span>3</span> Pay by UPI, card, net banking or wallet</li>
+                            <li><span>4</span> You get a receipt by email straight away</li>
+                        </ol>
+                    </div>
+
+                    <div class="pay-side-card">
+                        <h3>Accepted methods</h3>
+                        <ul class="pay-methods">
+                            <li><i class="fas fa-mobile-screen"></i> UPI - GPay, PhonePe, Paytm, BHIM</li>
+                            <li><i class="fas fa-credit-card"></i> Debit &amp; Credit Cards</li>
+                            <li><i class="fas fa-building-columns"></i> Net Banking - all major banks</li>
+                            <li><i class="fas fa-wallet"></i> Wallets</li>
+                        </ul>
+                    </div>
+
+                    <div class="pay-side-card pay-help">
+                        <h3>Need help?</h3>
+                        <p>Something went wrong with a payment, or not sure how much to pay?</p>
+                        <a href="https://wa.me/919987665922" class="btn btn-outline" target="_blank" rel="noopener">
+                            <i class="fab fa-whatsapp"></i> Message us on WhatsApp
+                        </a>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>

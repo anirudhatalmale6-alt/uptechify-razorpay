@@ -1,0 +1,25 @@
+    <section class="page-header pay-header">
+        <div class="page-header-content">
+            <h1>Payment Not Completed</h1>
+        </div>
+    </section>
+
+    <section class="section pay-section">
+        <div class="container">
+            <div class="result-wrap">
+                <div class="result-icon bad" id="resultIcon"><i class="fas fa-xmark"></i></div>
+                <h1 id="resultTitle">Your payment did not go through</h1>
+                <p id="resultMessage">Nothing has been charged to your account. This happens sometimes - a bank timeout, a wrong OTP, or the window being closed.</p>
+
+                <div class="receipt" id="reasonBox" hidden>
+                    <div class="receipt-row"><span>Reason</span><strong id="rcReason">-</strong></div>
+                    <div class="receipt-row"><span>Reference</span><strong id="rcOrder">-</strong></div>
+                </div>
+
+                <div class="result-actions">
+                    <a href="payment.html" class="btn btn-primary"><i class="fas fa-rotate-right"></i> Try Again</a>
+                    <a href="https://wa.me/919987665922" class="btn btn-outline" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Get Help</a>
+                </div>
+            </div>
+        </div>
+    </section>

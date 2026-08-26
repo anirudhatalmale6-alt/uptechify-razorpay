@@ -1,0 +1,343 @@
+    <!-- Payment page styles -->
+    <style>
+        /* The site sets display on these blocks, which beats the browser's own
+           rule for the hidden attribute - without this the summary bar and the
+           message box would show even while marked hidden. */
+        [hidden] {
+            display: none !important;
+        }
+
+        /* The other pages have a photo banner here; this one is plain so the
+           form is the first thing you look at. */
+        .pay-header {
+            background: linear-gradient(135deg, var(--deep-navy) 0%, #12315c 100%);
+            height: 32vh;
+            min-height: 220px;
+        }
+
+        .pay-section {
+            padding: 70px 0 90px;
+        }
+
+        .pay-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+            gap: 30px;
+            align-items: start;
+            margin-top: 40px;
+        }
+
+        .pay-card {
+            padding: 35px;
+        }
+
+        .req {
+            color: #E11D48;
+        }
+
+        .optional {
+            color: var(--off-white-muted);
+            font-weight: 400;
+            font-size: 13px;
+        }
+
+        .field-hint {
+            display: block;
+            margin-top: 7px;
+            font-size: 13px;
+            color: #64748B;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        textarea.pay-notes {
+            min-height: 90px;
+        }
+
+        /* Honeypot: off screen rather than display:none, which some bots skip. */
+        .hp-field {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        .pay-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.08), rgba(0, 201, 167, 0.08));
+            border: 1px solid rgba(0, 102, 255, 0.2);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .pay-summary span {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .pay-summary strong {
+            font-size: 22px;
+            color: var(--deep-navy);
+        }
+
+        .pay-alert {
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 15px;
+            line-height: 1.5;
+            background-color: #FEF2F2;
+            border: 1px solid #FECACA;
+            color: #B91C1C;
+        }
+
+        .pay-alert.info {
+            background-color: #EFF6FF;
+            border-color: #BFDBFE;
+            color: #1D4ED8;
+        }
+
+        .pay-submit {
+            width: 100%;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .pay-submit[disabled] {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .pay-secure {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748B;
+        }
+
+        .pay-secure i {
+            color: var(--teal);
+            margin-right: 5px;
+        }
+
+        .pay-side-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 26px;
+            margin-bottom: 22px;
+        }
+
+        .pay-side-card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            color: var(--deep-navy);
+            margin-bottom: 16px;
+        }
+
+        .pay-steps {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .pay-steps li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
+            font-size: 15px;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .pay-steps li span {
+            flex: 0 0 26px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--sky-blue), var(--teal));
+            color: #FFFFFF;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pay-methods {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .pay-methods li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 0;
+            font-size: 15px;
+            color: var(--text-dark);
+        }
+
+        .pay-methods i {
+            color: var(--sky-blue);
+            width: 20px;
+            text-align: center;
+        }
+
+        .pay-help p {
+            font-size: 15px;
+            color: #64748B;
+            margin-bottom: 16px;
+            line-height: 1.55;
+        }
+
+        .pay-help .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Result pages */
+        .result-wrap {
+            max-width: 620px;
+            margin: 0 auto;
+            text-align: center;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 45px 35px;
+        }
+
+        .result-icon {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 38px;
+            color: #FFFFFF;
+        }
+
+        .result-icon.ok {
+            background: linear-gradient(135deg, var(--teal), #059669);
+        }
+
+        .result-icon.bad {
+            background: linear-gradient(135deg, #F43F5E, #B91C1C);
+        }
+
+        .result-icon.wait {
+            background: linear-gradient(135deg, var(--sky-blue), #6366F1);
+        }
+
+        .result-wrap h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            color: var(--deep-navy);
+            margin-bottom: 12px;
+        }
+
+        .result-wrap > p {
+            color: #64748B;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 26px;
+        }
+
+        .receipt {
+            text-align: left;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 13px 18px;
+            font-size: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .receipt-row:last-child {
+            border-bottom: 0;
+        }
+
+        .receipt-row span {
+            color: #64748B;
+        }
+
+        .receipt-row strong {
+            color: var(--deep-navy);
+            font-weight: 600;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .receipt-row.total {
+            background-color: #F8FAFC;
+        }
+
+        .receipt-row.total strong {
+            font-size: 19px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 900px) {
+            .pay-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .pay-section {
+                padding: 45px 0 65px;
+            }
+
+            .pay-card {
+                padding: 24px 20px;
+            }
+
+            .pay-side-card {
+                padding: 22px 20px;
+            }
+
+            .result-wrap {
+                padding: 34px 22px;
+            }
+
+            .result-wrap h1 {
+                font-size: 23px;
+            }
+
+            .result-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* iOS zooms the page in if an input is under 16px. */
+            .form-control {
+                font-size: 16px;
+            }
+        }
+    </style>
